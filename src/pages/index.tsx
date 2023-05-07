@@ -7,7 +7,7 @@ import { api } from "~/utils/api";
 import { UserButton } from "@clerk/nextjs";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const {data} = api.posts.getAll.useQuery();
 
   return (
     <>
@@ -49,7 +49,7 @@ const Home: NextPage = () => {
             </Link>
           </div>
           <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
+            {data?.map((post) => (<div key={post.id}>{post.content}</div>))}
           </p>
         </div>
       </main>
