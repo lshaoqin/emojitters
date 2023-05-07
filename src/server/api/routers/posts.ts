@@ -1,5 +1,5 @@
 import { clerkClient, User } from "@clerk/nextjs/server";
-import { z } from "zod";
+import { TRPCError } from "@trpc/server"
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
@@ -22,9 +22,27 @@ export const postsRouter = createTRPCRouter({
       limit: 100,
     })).map(filterUserForClient);
 
-    return posts.map((post) => ({
-      post, 
-      author: users.find((user) => user.id === post.authorId)!,
-    }));
+    return posts.map((post) => {
+      const author = users.find((user) => user.id === post.authorId);
+
+      if (!author) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Author for post not found. POST ID: ${post.id}, USER ID: ${post.authorId}`,
+        });
+      }
+      if (!author.username) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Author has no GitHub Account: ${author.id}`,
+        });
+      }  
+      return {post, 
+        author: {
+          ...author,
+          username: author.username ?? "(username not found)",
+        },
+      };
+    });
   }),
 });
