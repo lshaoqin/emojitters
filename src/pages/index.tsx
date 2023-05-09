@@ -7,6 +7,7 @@ import { api, RouterOutputs } from "~/utils/api";
 import { UserButton, useUser } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
@@ -49,7 +50,7 @@ const PostView = (props: PostWithUser) => {
 const Home: NextPage = () => {
   const {data, isLoading} = api.posts.getAll.useQuery();
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <LoadingPage/>
 
   if (!data) return <div>No posts so far :/</div>
 
