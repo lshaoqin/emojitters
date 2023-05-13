@@ -3,13 +3,14 @@ import Head from "next/head";
 import Image from "next/image";
 
 import { api, RouterOutputs } from "~/utils/api";
-
+import { toast } from "react-hot-toast";  
 import { useState } from "react";
 
 import { UserButton, useUser } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
+import { toNamespacedPath } from "path";
 
 dayjs.extend(relativeTime);
 
@@ -25,6 +26,14 @@ const CreatePostWizard = () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
     },
+    onError: (err) => {
+      const errorMessage = err.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error(err.message);
+      }
+    },
   });
 
   if (!user) return null;
@@ -39,13 +48,28 @@ const CreatePostWizard = () => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         disabled={isPosting}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (input !== "") {
+              mutate({ content: input });
+            }
+          }
+        }
+        }
       />
-      <button
+      {input !== "" && (<button
         className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         onClick={() => mutate({ content: input })}
+        disabled={isPosting}
       >
         Post
-      </button>
+      </button>)}
+      {isPosting && (
+        <div className="flex items-center justify-center">
+      <LoadingSpinner size={20} />
+      </div>
+      )}
     </div>
   );
 };
