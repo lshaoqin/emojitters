@@ -6,6 +6,8 @@ import { api } from "~/utils/api";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
 import { prisma } from "~/server/db";
+import { PageLayout } from "~/components/layout";
+import Image from "next/image";
 
 const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
 
@@ -17,9 +19,14 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
     <Head>
       <title>{data.username}</title>
     </Head>
-      <main className="flex h-screen justify-center">
-          {data.username}
-      </main>
+      <PageLayout>
+        <div className="h-36 bg-slate-600 relative">
+          <Image src={data.profileImageUrl} alt={`${data.username ?? ""}'s profile pic`} width={128} height={128}
+          className="-mb-[64px] absolute bottom-0 left-0 ml-4 rounded-full border-2 border-black"/>
+        </div>
+        <div className="h-[64px]"></div>
+        <div className="p-4 text-2xl font-bold bg-black">{`@${data.username ?? ""}`}</div>
+      </PageLayout>
     </>
   );
 };

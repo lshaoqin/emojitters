@@ -6,12 +6,13 @@ import { api, RouterOutputs } from "~/utils/api";
 import { toast } from "react-hot-toast";  
 import { useState } from "react";
 
-import { UserButton, useUser } from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { toNamespacedPath } from "path";
 import Link from "next/link";
+import { PageLayout } from "~/components/layout";
 
 dayjs.extend(relativeTime);
 
@@ -110,7 +111,7 @@ const Feed = () => {
   if (!data) return <div>No posts so far :/</div>;
 
   return (
-    <div className="flex grow flex-col text-2xl text-white">
+    <div className="flex grow flex-col text-2xl text-white overflow-y-scroll">
       {[...data]?.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
@@ -119,16 +120,25 @@ const Feed = () => {
 };
 
 const Home: NextPage = () => {
+  const {isLoaded: userLoaded, isSignedIn } = useUser();
+
   api.posts.getAll.useQuery();
 
+  if (!userLoaded) return <LoadingPage />;
   return (
     <>
-      <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
-          <CreatePostWizard />
+      <PageLayout>
+          <div className="flex border-b border-slate-400 p-4">
+            {!isSignedIn && (
+              <div className="flex justify-center">
+                <SignInButton />
+              </div>
+              )}
+            {isSignedIn && <CreatePostWizard />}
+          </div>
           <Feed />
-        </div>
-      </main>
+          
+       </PageLayout>
     </>
   );
 };
