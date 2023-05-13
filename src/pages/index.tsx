@@ -46,13 +46,25 @@ const PostView = (props: PostWithUser) => {
   );
 };
 
-
-const Home: NextPage = () => {
+const Feed = () => {
+  
   const {data, isLoading} = api.posts.getAll.useQuery();
 
   if (isLoading) return <LoadingPage/>
 
   if (!data) return <div>No posts so far :/</div>
+
+  return (
+      <div className="text-2xl text-white flex flex-col grow">
+        {[...data]?.map((fullPost) => 
+        (<PostView {...fullPost} key={fullPost.post.id} />))}
+      </div>
+  );
+}
+
+
+const Home: NextPage = () => {
+  api.posts.getAll.useQuery()
 
   return (
     <>
@@ -63,13 +75,8 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex justify-center h-screen">
         <div className="w-full md:max-w-2xl border-x h-full border-slate-400">
-          <CreatePostWizard/>
-          <div>
-            <div className="text-2xl text-white flex flex-col">
-              {[...data]?.map((fullPost) => 
-              (<PostView {...fullPost} key={fullPost.post.id} />))}
-            </div>
-          </div>
+          <CreatePostWizard />
+          <Feed />
         </div>
       </main>
     </>
