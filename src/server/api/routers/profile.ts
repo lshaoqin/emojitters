@@ -10,20 +10,20 @@ import {
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 export const profileRouter = createTRPCRouter({
-    getUserByUsername: publicProcedure
-      .input(z.object({ username: z.string() }))
-      .query(async ({ input }) => {
-        const [user] = await clerkClient.users.getUserList({
-          username: [input.username],
+  getUserByUsername: publicProcedure
+    .input(z.object({ username: z.string() }))
+    .query(async ({ input }) => {
+      const [user] = await clerkClient.users.getUserList({
+        username: [input.username],
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
         });
+      }
 
-        if (!user) {
-            throw new TRPCError({
-                code: "NOT_FOUND",
-                message: "User not found",
-            });
-        }
-
-        return filterUserForClient(user);
+      return filterUserForClient(user);
     }),
 });
